@@ -29,6 +29,9 @@ public class MedicalData {
 
     private Instant createdAt;
 
+    private String type;
+
+
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     private byte[] pdfData;

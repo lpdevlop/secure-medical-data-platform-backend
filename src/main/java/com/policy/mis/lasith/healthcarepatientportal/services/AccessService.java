@@ -81,7 +81,7 @@ public class AccessService {
         request.get().setStatus(AccessRequest.RequestStatus.APPROVED);
         request.get().setRespondedAt(now);
 
-        accessRequestRepository.save(request);
+        accessRequestRepository.save(request.get());
 
         return GrantAccessResponse.builder()
                 .requestId(request.get().getId())
