@@ -8,7 +8,7 @@ import lombok.Setter;
 @Table(name = "docter")
 @Getter
 @Setter
-public class DoctorModel {
+public class DoctorProfile {
 
 
     @Id

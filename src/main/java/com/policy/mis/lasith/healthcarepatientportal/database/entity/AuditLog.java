@@ -2,14 +2,38 @@ package com.policy.mis.lasith.healthcarepatientportal.database.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.Instant;
+import java.util.UUID;
+
 
 @Entity
-@Table(name = "appointments")
-public class AppointmentsModel {
-
+@Table(name = "audit_log")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AuditLog {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
+    private UUID actorId;
 
+    private String actorRole;
+
+    private String action;
+
+    private String targetType;
+
+    private UUID targetId;
+
+    @Column(length = 2000)
+    private String details;
+
+    private Instant timestamp;
+
+    private String ipAddress;
 }

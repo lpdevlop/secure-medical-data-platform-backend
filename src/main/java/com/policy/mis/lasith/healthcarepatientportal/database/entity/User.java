@@ -1,31 +1,70 @@
 package com.policy.mis.lasith.healthcarepatientportal.database.entity;
 
-
-import com.policy.mis.lasith.healthcarepatientportal.database.enums.UserRoles;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
+@Table(name = "users")
 @Getter
 @Setter
-@Table(name = "user_model")
-public class UserModel {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String fullName;
 
-    private UserRoles role;
+    @Column(unique = true)
+    private String nic;       // login field
 
-    private boolean isEnable;
+    private String password;
 
-    private Instant createdAt;
+    private String role;      // DOCTOR / PATIENT
 
-    private Instant updatedAt;
+    // Implement UserDetails methods
 
+    @Override
+    public String getUsername() {
+        return nic;   // use nic or email as login
+    }
+
+    @Override
+    public String getPassword() {
+        return password;  // must return the password field
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
