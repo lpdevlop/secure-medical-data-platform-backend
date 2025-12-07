@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MedicalDocument {
+public class MedicalData {
     @Id
     @GeneratedValue
     private UUID id;
@@ -28,4 +28,9 @@ public class MedicalDocument {
     private String storageUrl;
 
     private Instant createdAt;
+
+    @Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] pdfData;
+
 }
