@@ -1,9 +1,7 @@
 package com.policy.mis.lasith.healthcarepatientportal.controllers;
 
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.*;
-import com.policy.mis.lasith.healthcarepatientportal.database.enums.UserRoles;
 import com.policy.mis.lasith.healthcarepatientportal.services.AccessService;
-import org.springframework.context.annotation.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/access")

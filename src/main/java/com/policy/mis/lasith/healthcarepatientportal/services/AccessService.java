@@ -19,9 +19,14 @@ import java.util.UUID;
 public class AccessService {
 
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private AccessRequestRepository accessRequestRepository;
+    private final AccessRequestRepository accessRequestRepository;
+
+    public AccessService(UserRepository userRepository, AccessRequestRepository accessRequestRepository) {
+        this.userRepository = userRepository;
+        this.accessRequestRepository = accessRequestRepository;
+    }
 
     public AccessResponse createAccessRequest(AccessRequestDTO accessRequest) {
 
