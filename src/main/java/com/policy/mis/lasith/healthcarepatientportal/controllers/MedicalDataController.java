@@ -20,14 +20,14 @@ public class MedicalDataController {
 
     @GetMapping("/history/{patientId}")
     public ResponseEntity<List<MedicalDocumentResponse>> getMedicalHistory(
-            @PathVariable UUID patientId
+            @PathVariable Long patientId
     ) {
         return ResponseEntity.ok(medicalDataService.getMedicalHistory(patientId));
     }
 
     @GetMapping("/prescriptions/{patientId}")
     public ResponseEntity<List<MedicalDocumentResponse>> getPrescriptionHistory(
-            @PathVariable UUID patientId
+            @PathVariable Long patientId
     ) {
         return ResponseEntity.ok(medicalDataService.getPrescriptionHistory(patientId));
     }

@@ -33,7 +33,7 @@ public class AccessService {
         User doctor = userRepository.findBySecureId(accessRequest.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
-        if (!doctor.getRole().equals(UserRoles.DOCTOR)) {
+        if (!doctor.getRole().equals(UserRoles.DOCTOR.name())) {
             throw new RuntimeException("User is not authorized as DOCTOR");
         }
 

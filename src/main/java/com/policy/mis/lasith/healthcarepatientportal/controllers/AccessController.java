@@ -2,6 +2,8 @@ package com.policy.mis.lasith.healthcarepatientportal.controllers;
 
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.*;
 import com.policy.mis.lasith.healthcarepatientportal.services.AccessService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,13 +23,13 @@ public class AccessController {
     }
 
 
-    @PostMapping("/request")
+    @PostMapping(value = "/request", produces = "application/json")
     @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<AccessResponse> access(@RequestBody AccessRequestDTO accessRequest) {
+    public ResponseEntity<?> access(@RequestBody AccessRequestDTO accessRequest) {
 
         AccessResponse response = accessService.createAccessRequest(accessRequest);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(true);
     }
 
     @PostMapping("/grant")

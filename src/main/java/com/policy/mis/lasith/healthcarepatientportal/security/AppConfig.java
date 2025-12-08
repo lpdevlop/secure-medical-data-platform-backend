@@ -32,8 +32,8 @@ public class AppConfig {
     public UserDetailsService userDetailsService() {
         return new UserDetailsService() {
             @Override
-            public UserDetails loadUserByUsername(String nic) throws UsernameNotFoundException {
-                return userRepository.findUserByNic(nic).get();
+            public UserDetails loadUserByUsername(String secureId) throws UsernameNotFoundException {
+                return userRepository.findBySecureId(secureId).get();
             }
         };
     }

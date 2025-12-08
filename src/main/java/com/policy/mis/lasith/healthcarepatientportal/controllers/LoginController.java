@@ -2,6 +2,8 @@ package com.policy.mis.lasith.healthcarepatientportal.controllers;
 
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.LoginRequest;
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.LoginResponse;
+import com.policy.mis.lasith.healthcarepatientportal.database.dtos.SignUpRequest;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
 import com.policy.mis.lasith.healthcarepatientportal.services.LoginService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,5 +27,14 @@ public class LoginController {
         LoginResponse response = loginService.login(request);
 
         return ResponseEntity.ok(response);
+    }
+
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> register(@RequestBody SignUpRequest request) {
+
+        User savedUser = loginService.registerUser(request);
+
+        return ResponseEntity.ok(savedUser);
     }
 }

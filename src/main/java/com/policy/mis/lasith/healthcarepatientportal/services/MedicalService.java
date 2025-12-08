@@ -22,7 +22,7 @@ public class MedicalService {
     }
 
 
-    public List<MedicalDocumentResponse> getMedicalHistory(UUID patientId) {
+    public List<MedicalDocumentResponse> getMedicalHistory(Long patientId) {
         User patient = userRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
@@ -32,7 +32,7 @@ public class MedicalService {
                 .toList();
     }
 
-    public List<MedicalDocumentResponse> getPrescriptionHistory(UUID patientId) {
+    public List<MedicalDocumentResponse> getPrescriptionHistory(Long patientId) {
         User patient = userRepository.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
