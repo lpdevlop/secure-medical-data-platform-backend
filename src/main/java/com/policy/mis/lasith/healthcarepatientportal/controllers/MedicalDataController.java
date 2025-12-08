@@ -2,6 +2,7 @@ package com.policy.mis.lasith.healthcarepatientportal.controllers;
 
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalDocumentResponse;
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalHistoryWithGrantInfo;
+import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalRecordsWithGrantInfo;
 import com.policy.mis.lasith.healthcarepatientportal.services.MedicalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +28,10 @@ public class MedicalDataController {
         return ResponseEntity.ok(medicalDataService.getMedicalHistory(doctorId));
     }
 
-    @GetMapping("/prescriptions/{patientId}")
-    public ResponseEntity<List<MedicalDocumentResponse>> getPrescriptionHistory(
-            @PathVariable Long patientId
+    @GetMapping("/records/{doctorId}")
+    public ResponseEntity<List<MedicalRecordsWithGrantInfo>> getPrescriptionHistory(
+            @PathVariable String doctorId
     ) {
-        return ResponseEntity.ok(medicalDataService.getPrescriptionHistory(patientId));
+        return ResponseEntity.ok(medicalDataService.getPrescriptionHistory(doctorId));
     }
 }

@@ -1,6 +1,7 @@
 package com.policy.mis.lasith.healthcarepatientportal.services;
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalDocumentResponse;
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalHistoryWithGrantInfo;
+import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalRecordsWithGrantInfo;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessGrantRepository;
@@ -52,13 +53,25 @@ public class MedicalService {
                 .toList();
     }
 
-    public List<MedicalDocumentResponse> getPrescriptionHistory(Long patientId) {
-        User patient = userRepository.findById(patientId)
+    public List<MedicalRecordsWithGrantInfo> getPrescriptionHistory(String doctorId) {
+      userRepository.findBySecureId(doctorId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        return medicalDataRepository.findByPatientAndType(patient, "PRESCRIPTION")
-                .stream()
-                .map(MedicalDocumentResponse::fromEntity)
+        List<AccessGrant> accessGrants =accessGrantRepository.findByDoctor_SecureIdAndActiveTrueAndIsExpiredFalseAndExpiresAtAfter(doctorId,Instant.now());
+
+        return accessGrants.stream()
+                .flatMap(grant -> medicalDataRepository
+                        .findByPatientAndType(grant.getPatient(), "RECORD")
+                        .stream()
+                        .map(medical -> new MedicalRecordsWithGrantInfo(
+                                medical.getId(),
+                                medical.getPatient().getSecureId(),
+                                medical.getType(),
+                                "Granted",
+                                medical.getCreatedAt(),
+                                grant.getExpiresAt()
+                        ))
+                )
                 .toList();
     }
 
