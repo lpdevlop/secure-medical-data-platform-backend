@@ -34,4 +34,17 @@ public class MedicalDataController {
     ) {
         return ResponseEntity.ok(medicalDataService.getPrescriptionHistory(doctorId));
     }
+
+
+    @GetMapping("/history/{doctorId}")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<List<MedicalHistoryWithGrantInfo>> getMyMedicalHistory(@PathVariable String doctorId) {
+        return ResponseEntity.ok(medicalDataService.getMyMedicalHistory(doctorId));
+    }
+
+    @GetMapping("/record/{doctorId}")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<List<MedicalRecordsWithGrantInfo>> getMyMedicalRecords(@PathVariable String doctorId) {
+        return ResponseEntity.ok(medicalDataService.getMyMedicalRecords(doctorId));
+    }
 }

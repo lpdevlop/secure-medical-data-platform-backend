@@ -1,17 +1,18 @@
 package com.policy.mis.lasith.healthcarepatientportal.services;
 
-import com.policy.mis.lasith.healthcarepatientportal.database.dtos.AccessRequestDTO;
-import com.policy.mis.lasith.healthcarepatientportal.database.dtos.AccessResponse;
-import com.policy.mis.lasith.healthcarepatientportal.database.dtos.ApproveAccessDTO;
-import com.policy.mis.lasith.healthcarepatientportal.database.dtos.GrantAccessResponse;
+import com.policy.mis.lasith.healthcarepatientportal.database.dtos.*;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessRequest;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
 import com.policy.mis.lasith.healthcarepatientportal.database.enums.UserRoles;
+import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessGrantRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessRequestRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,10 +24,14 @@ public class AccessService {
 
     private final AccessRequestRepository accessRequestRepository;
 
-    public AccessService(UserRepository userRepository, AccessRequestRepository accessRequestRepository) {
+    private final AccessGrantRepository accessGrantRepository;
+
+    public AccessService(UserRepository userRepository, AccessRequestRepository accessRequestRepository, AccessGrantRepository accessGrantRepository) {
         this.userRepository = userRepository;
         this.accessRequestRepository = accessRequestRepository;
+        this.accessGrantRepository = accessGrantRepository;
     }
+
 
     public AccessResponse createAccessRequest(AccessRequestDTO accessRequest) {
 
@@ -98,4 +103,45 @@ public class AccessService {
                 .build();
     }
 
+
+    public AccessGrant grantConsent(String patientId, ConsentGrantPayload payload) {
+        User patient = userRepository.findBySecureId(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        User doctor = userRepository.findBySecureId(payload.getDoctorSecureId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        AccessGrant grant = new AccessGrant();
+        grant.setDoctor(doctor);
+        grant.setPatient(patient);
+        grant.setStartAt(Instant.now());
+        grant.setExpiresAt(Instant.now().plus(Duration.ofHours(1)));
+        grant.setActive(true);
+        grant.setExpired(true);
+
+
+        return accessGrantRepository.save(grant);
+    }
+
+    public AccessGrant revokeConsent(String patientId, ConsentGrantPayload payload) {
+        User patient = userRepository.findBySecureId(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        User doctor = userRepository.findBySecureId(payload.getDoctorSecureId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        AccessGrant grant = accessGrantRepository.findByPatientAndDoctorAndActive(
+                        doctor.getSecureId(), patient.getSecureId())
+                .orElseThrow(() -> new RuntimeException("Active grant not found"));
+
+        grant.setActive(false);
+        grant.setExpired(true);
+        grant.setExpiresAt(Instant.now());
+        grant.setRevokeTime(Instant.now());
+
+        return accessGrantRepository.save(grant);
+    }
+
+    public List<AccessGrant> getActiveConsents(String patientId) {
+
+        return accessGrantRepository.findByActive(patientId);
+    }
 }

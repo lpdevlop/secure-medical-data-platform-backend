@@ -1,15 +1,17 @@
 package com.policy.mis.lasith.healthcarepatientportal.controllers;
 
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.*;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
 import com.policy.mis.lasith.healthcarepatientportal.services.AccessService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -37,6 +39,23 @@ public class AccessController {
     public ResponseEntity<GrantAccessResponse> grantAccess(@RequestBody ApproveAccessDTO dto) {
         GrantAccessResponse response = accessService.approveAccess(dto);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/grant")
+    public ResponseEntity<AccessGrant> grantConsent(@RequestBody ConsentGrantPayload payload,
+                                                    @AuthenticationPrincipal User currentPatient) {
+        return ResponseEntity.ok(accessService.grantConsent(currentPatient.getSecureId(), payload));
+    }
+
+    @PostMapping("/revoke")
+    public ResponseEntity<AccessGrant> revokeConsent(@RequestBody ConsentGrantPayload payload,
+                                                     @AuthenticationPrincipal User currentPatient) {
+        return ResponseEntity.ok(accessService.revokeConsent(currentPatient.getSecureId(), payload));
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<AccessGrant>> getActiveConsents(@AuthenticationPrincipal User currentPatient) {
+        return ResponseEntity.ok(accessService.getActiveConsents(currentPatient.getSecureId()));
     }
 
 }

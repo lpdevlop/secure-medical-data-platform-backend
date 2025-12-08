@@ -28,6 +28,9 @@ public class AccessGrant {
 
     private Instant expiresAt;
 
+    private Instant revokeTime;
+
+
     private boolean active ;
 
     private boolean isExpired;

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AccessGrantRepository extends JpaRepository<AccessGrant,Long> {
@@ -16,4 +17,8 @@ public interface AccessGrantRepository extends JpaRepository<AccessGrant,Long> {
     List<AccessGrant> findByDoctor_SecureIdAndActiveTrueAndIsExpiredFalseAndExpiresAtAfter(
             String doctorSecureId, Instant now
     );
+
+    Optional<AccessGrant> findByPatientAndDoctorAndActive(String doctor, String patientId);
+
+    List<AccessGrant> findByActive(String patientId);
 }

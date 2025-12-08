@@ -75,4 +75,35 @@ public class MedicalService {
                 .toList();
     }
 
+    public List<MedicalRecordsWithGrantInfo> getMyMedicalRecords(String patientId) {
+        User user=userRepository.findBySecureId(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        return medicalDataRepository.findByPatientAndType(user, "HISTORY").stream().map(
+                medical -> new MedicalRecordsWithGrantInfo(
+                        medical.getId(),
+                        medical.getPatient().getSecureId(),
+                        medical.getType(),
+                        "Granted",
+                        medical.getCreatedAt(),
+                        null
+        )).toList();
+    }
+
+
+    public List<MedicalHistoryWithGrantInfo> getMyMedicalHistory(String doctorId) {
+        User user=userRepository.findBySecureId(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        return  medicalDataRepository
+                        .findByPatientAndType(user, "HISTORY")
+                        .stream()
+                        .map(medical -> new MedicalHistoryWithGrantInfo(
+                                medical.getId(),
+                                medical.getPatient().getSecureId(),
+                                medical.getType(),
+                                "Granted",
+                                medical.getCreatedAt(),
+                                null
+                        )).toList();
+    }
 }
