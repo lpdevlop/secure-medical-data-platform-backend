@@ -2,7 +2,6 @@ package com.policy.mis.lasith.healthcarepatientportal.database.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.Instant;
 import java.util.UUID;
 
@@ -14,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class MedicalData {
+
     @Id
     @GeneratedValue
     private UUID id;
@@ -31,6 +31,7 @@ public class MedicalData {
 
     private String type;
 
+    private String prescriptionHistory;
 
     @Lob
     @Column(columnDefinition = "LONGBLOB")

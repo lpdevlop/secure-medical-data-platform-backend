@@ -13,6 +13,7 @@ public class MedicalDocumentResponse {
     private UUID id;
     private String name;
     private String docType;
+    private Long requestExpireTime;
     private String type;
     private String storageUrl;
     private Instant createdAt;

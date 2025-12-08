@@ -13,6 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class AccessRequest {
+
     @Id
     @GeneratedValue
     private UUID id;
@@ -36,5 +37,5 @@ public class AccessRequest {
     private Instant requestedAt;
     private Instant respondedAt;
 
-    public enum RequestStatus { PENDING, APPROVED, DENIED, CANCELLED }
+    public enum RequestStatus { PENDING, APPROVED,EXPIRED, DENIED, CANCELLED }
 }
