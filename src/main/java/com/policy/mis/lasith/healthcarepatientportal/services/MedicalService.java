@@ -4,12 +4,12 @@ import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalHistor
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalRecordsWithGrantInfo;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
+import com.policy.mis.lasith.healthcarepatientportal.database.enums.MedicalDataType;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessGrantRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessRequestRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.MedicalDataRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -32,21 +32,20 @@ public class MedicalService {
 
 
     public List<MedicalHistoryWithGrantInfo> getMedicalHistory(String doctorId) {
-         userRepository.findBySecureId(doctorId)
+        User doctor =userRepository.findBySecureId(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
-        List<AccessGrant> accessGrants =accessGrantRepository.findByDoctor_SecureIdAndActiveTrueAndIsExpiredFalseAndExpiresAtAfter(doctorId,Instant.now());
+        List<AccessGrant> accessGrants =accessGrantRepository.findAccessGrantByDoctorAndActiveTrue(doctor);
 
         return accessGrants.stream()
                 .flatMap(grant -> medicalDataRepository
-                        .findByPatientAndType(grant.getPatient(), "HISTORY")
+                        .findByPatientAndType(grant.getPatient(), MedicalDataType.HISTORY.name())
                         .stream()
                         .map(medical -> new MedicalHistoryWithGrantInfo(
-                                medical.getId(),
                                 medical.getPatient().getSecureId(),
-                                medical.getType(),
+                                medical.getName(),
+                                medical.getId(),
                                 "Granted",
-                                medical.getCreatedAt(),
                                 grant.getExpiresAt()
                         ))
                 )
@@ -54,21 +53,20 @@ public class MedicalService {
     }
 
     public List<MedicalRecordsWithGrantInfo> getPrescriptionHistory(String doctorId) {
-      userRepository.findBySecureId(doctorId)
+     User user= userRepository.findBySecureId(doctorId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        List<AccessGrant> accessGrants =accessGrantRepository.findByDoctor_SecureIdAndActiveTrueAndIsExpiredFalseAndExpiresAtAfter(doctorId,Instant.now());
+        List<AccessGrant> accessGrants =accessGrantRepository.findAccessGrantByDoctorAndActiveTrue(user);
 
         return accessGrants.stream()
                 .flatMap(grant -> medicalDataRepository
-                        .findByPatientAndType(grant.getPatient(), "RECORD")
+                        .findByPatientAndType(grant.getPatient(), MedicalDataType.RECORD.name())
                         .stream()
                         .map(medical -> new MedicalRecordsWithGrantInfo(
-                                medical.getId(),
                                 medical.getPatient().getSecureId(),
-                                medical.getType(),
+                                medical.getName(),
+                                medical.getId(),
                                 "Granted",
-                                medical.getCreatedAt(),
                                 grant.getExpiresAt()
                         ))
                 )
@@ -81,11 +79,10 @@ public class MedicalService {
 
         return medicalDataRepository.findByPatientAndType(user, "HISTORY").stream().map(
                 medical -> new MedicalRecordsWithGrantInfo(
-                        medical.getId(),
                         medical.getPatient().getSecureId(),
-                        medical.getType(),
+                        medical.getName(),
+                        medical.getId(),
                         "Granted",
-                        medical.getCreatedAt(),
                         null
         )).toList();
     }
@@ -98,11 +95,10 @@ public class MedicalService {
                         .findByPatientAndType(user, "HISTORY")
                         .stream()
                         .map(medical -> new MedicalHistoryWithGrantInfo(
-                                medical.getId(),
                                 medical.getPatient().getSecureId(),
-                                medical.getType(),
+                                medical.getName(),
+                                medical.getId(),
                                 "Granted",
-                                medical.getCreatedAt(),
                                 null
                         )).toList();
     }

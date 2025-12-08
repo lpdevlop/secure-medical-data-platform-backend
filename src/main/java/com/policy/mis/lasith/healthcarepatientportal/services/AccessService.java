@@ -9,7 +9,7 @@ import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessG
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessRequestRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import java.time.Duration;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -145,7 +145,8 @@ public class AccessService {
     }
 
     public List<AccessGrant> getActiveConsents(String patientId) {
-
-        return accessGrantRepository.findByActive(patientId);
+        User patient = userRepository.findBySecureId(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        return accessGrantRepository.findAccessGrantByPatientAndActiveTrue(patient);
     }
 }

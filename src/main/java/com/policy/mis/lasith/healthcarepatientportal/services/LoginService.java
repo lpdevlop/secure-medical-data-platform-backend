@@ -46,8 +46,6 @@ public class LoginService {
                 .address(request.getAddress())
                 .emergencyContact(request.getEmergencyContact())
                 .secureId(UUID.randomUUID().toString())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         return userRepository.save(newUser);

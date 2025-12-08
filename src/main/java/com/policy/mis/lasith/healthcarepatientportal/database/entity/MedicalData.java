@@ -32,6 +32,7 @@ public class MedicalData {
     private String docType;
 
     private String storageUrl;
+    @Enumerated(EnumType.STRING)
 
     private MedicalDataType type;
 

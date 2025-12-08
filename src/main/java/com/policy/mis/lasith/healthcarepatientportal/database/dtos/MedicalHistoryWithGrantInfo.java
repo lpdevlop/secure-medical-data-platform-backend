@@ -13,12 +13,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class MedicalHistoryWithGrantInfo {
-
-    UUID medicalId;
     String patientId;
+    private String name;
+    UUID medicalId;
     String type;
-    String status;
-    Instant createdAt;
     Instant accessExpires;
 
 }

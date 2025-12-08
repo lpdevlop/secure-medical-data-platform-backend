@@ -13,10 +13,9 @@ import java.util.UUID;
 @Getter
 @Setter
 public class MedicalRecordsWithGrantInfo {
-    UUID medicalId;
     String patientId;
+    private String name;
+    UUID medicalId;
     String type;
-    String status;
-    Instant createdAt;
     Instant accessExpires;
 }
