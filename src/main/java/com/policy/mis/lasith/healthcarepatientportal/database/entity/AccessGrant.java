@@ -3,6 +3,8 @@ package com.policy.mis.lasith.healthcarepatientportal.database.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
@@ -28,14 +30,17 @@ public class AccessGrant {
 
     private Instant expiresAt;
 
-    private Instant revokeTime;
-
-
     private boolean active ;
 
     private boolean isExpired;
 
-    private String scopeJson;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
+
 
 
 }

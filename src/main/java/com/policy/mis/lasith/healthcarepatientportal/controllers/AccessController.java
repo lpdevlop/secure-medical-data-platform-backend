@@ -5,7 +5,6 @@ import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
 import com.policy.mis.lasith.healthcarepatientportal.services.AccessService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,16 +40,11 @@ public class AccessController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/grant")
-    public ResponseEntity<AccessGrant> grantConsent(@RequestBody ConsentGrantPayload payload,
-                                                    @AuthenticationPrincipal User currentPatient) {
-        return ResponseEntity.ok(accessService.grantConsent(currentPatient.getSecureId(), payload));
-    }
 
     @PostMapping("/revoke")
-    public ResponseEntity<AccessGrant> revokeConsent(@RequestBody ConsentGrantPayload payload,
-                                                     @AuthenticationPrincipal User currentPatient) {
-        return ResponseEntity.ok(accessService.revokeConsent(currentPatient.getSecureId(), payload));
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<AccessGrant> revokeConsent(@RequestBody ApproveAccessDTO dto) {
+        return ResponseEntity.ok(accessService.revokeConsent(dto));
     }
 
     @GetMapping("/active")

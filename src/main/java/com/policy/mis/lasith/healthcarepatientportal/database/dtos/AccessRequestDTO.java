@@ -8,6 +8,5 @@ import lombok.Setter;
 public class AccessRequestDTO {
 
     private String patientSecureId;
-    private String reason;
     private String doctorId;
 }

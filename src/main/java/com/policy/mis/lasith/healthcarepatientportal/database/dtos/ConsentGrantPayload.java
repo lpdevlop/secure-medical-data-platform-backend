@@ -11,5 +11,4 @@ import java.time.Instant;
 @NoArgsConstructor
 public class ConsentGrantPayload {
     private String doctorSecureId;
-    private Instant expiresAt;
 }

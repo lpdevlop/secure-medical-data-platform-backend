@@ -2,6 +2,10 @@ package com.policy.mis.lasith.healthcarepatientportal.database.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -12,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class AccessRequest {
 
     @Id
@@ -20,22 +25,24 @@ public class AccessRequest {
 
 
     @ManyToOne(optional = false)
-    private User requester;
+    private User requesterDoctor;
 
 
     @ManyToOne(optional = false)
     private User patient;
 
 
-    private String reason;
-
-
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
 
 
-    private Instant requestedAt;
-    private Instant respondedAt;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    private Instant updatedAt;
+
 
     public enum RequestStatus { PENDING, APPROVED,EXPIRED, DENIED, CANCELLED }
 }

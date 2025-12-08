@@ -9,9 +9,10 @@ import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessG
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessRequestRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.UserRepository;
 import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,14 +44,17 @@ public class AccessService {
         }
 
         User patient = userRepository.findBySecureId(accessRequest.getPatientSecureId())
-                .orElseThrow(() -> new RuntimeException("Invalid patient secure ID"));
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        if(accessRequestRepository.findByRequesterDoctorAndPatient(doctor,patient).isPresent()){
+            throw new RuntimeException("Doctor not found");
+        }
+
 
         AccessRequest request = AccessRequest.builder()
-                .requester(doctor)
+                .requesterDoctor(doctor)
                 .patient(patient)
-                .reason(accessRequest.getReason())
                 .status(AccessRequest.RequestStatus.PENDING)
-                .requestedAt(Instant.now())
                 .build();
 
         accessRequestRepository.save(request);
@@ -60,21 +64,20 @@ public class AccessService {
                 .doctorName(doctor.getFullName())
                 .patientName(patient.getFullName())
                 .status(request.getStatus().name())
-                .requestedAt(request.getRequestedAt())
                 .build();
 
     }
 
     public GrantAccessResponse approveAccess(ApproveAccessDTO dto) {
 
-        User patient = userRepository.findBySecureId(dto.getId())
+        User patient = userRepository.findBySecureId(dto.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        if (!patient.getRole().equals(UserRoles.PATIENT)) {
+        if (!patient.getRole().equals(UserRoles.PATIENT.name())) {
             throw new RuntimeException("User is not authorized as PATIENT");
         }
 
-        Optional<AccessRequest> request = accessRequestRepository.findById(UUID.fromString(dto.getRequestId()));
+        Optional<AccessRequest> request = accessRequestRepository.findById(UUID.fromString(dto.getRequestedId()));
 
 
         if (!request.get().getPatient().getId().equals(patient.getId())) {
@@ -85,59 +88,60 @@ public class AccessService {
             throw new RuntimeException("This request is already processed.");
         }
 
-        Instant now = Instant.now();
-        Instant expires = now.plusSeconds(dto.getAccessDurationMinutes() * 60);
-
         request.get().setStatus(AccessRequest.RequestStatus.APPROVED);
-        request.get().setRespondedAt(now);
 
         accessRequestRepository.save(request.get());
 
-        return GrantAccessResponse.builder()
+        AccessGrant accessGrant=new AccessGrant();
+
+        User patientaprroved=new User();
+        patientaprroved.setId(patient.getId());
+        User doctorRequested=new User();
+        doctorRequested.setId(request.get().getRequesterDoctor().getId());
+
+        accessGrant.setPatient(patientaprroved);
+        accessGrant.setDoctor(doctorRequested);
+        accessGrant.setActive(true);
+        accessGrant.setExpiresAt(LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.UTC));
+        accessGrant.setStartAt(Instant.now());
+
+        accessGrantRepository.save(accessGrant);
+
+       return GrantAccessResponse.builder()
                 .requestId(request.get().getId())
-                .doctorName(request.get().getRequester().getFullName())
+                .doctorName(request.get().getRequesterDoctor().getFullName())
                 .patientName(request.get().getPatient().getFullName())
                 .status(request.get().getStatus().name())
-                .approvedAt(now)
-                .expiresAt(expires)
+                .expiresAt(accessGrant.getExpiresAt())
                 .build();
+
     }
 
 
-    public AccessGrant grantConsent(String patientId, ConsentGrantPayload payload) {
-        User patient = userRepository.findBySecureId(patientId)
+
+    public AccessGrant revokeConsent(ApproveAccessDTO payload) {
+
+        User patient = userRepository.findBySecureId(payload.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-        User doctor = userRepository.findBySecureId(payload.getDoctorSecureId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
-        AccessGrant grant = new AccessGrant();
-        grant.setDoctor(doctor);
-        grant.setPatient(patient);
-        grant.setStartAt(Instant.now());
-        grant.setExpiresAt(Instant.now().plus(Duration.ofHours(1)));
-        grant.setActive(true);
-        grant.setExpired(true);
+        if (!patient.getRole().equals(UserRoles.PATIENT.name())) {
+            throw new RuntimeException("User is not authorized as PATIENT");
+        }
 
+        Optional<AccessGrant> request = accessGrantRepository.findById(UUID.fromString(payload.getRequestedId()));
 
-        return accessGrantRepository.save(grant);
-    }
+        if (!request.get().getPatient().getId().equals(patient.getId())) {
+            throw new RuntimeException("You cannot approve someone else's access request.");
+        }
 
-    public AccessGrant revokeConsent(String patientId, ConsentGrantPayload payload) {
-        User patient = userRepository.findBySecureId(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-        User doctor = userRepository.findBySecureId(payload.getDoctorSecureId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        AccessGrant accessGrant=new AccessGrant();
 
-        AccessGrant grant = accessGrantRepository.findByPatientAndDoctorAndActive(
-                        doctor.getSecureId(), patient.getSecureId())
-                .orElseThrow(() -> new RuntimeException("Active grant not found"));
+        accessGrant.setId(request.get().getId());
+        accessGrant.setActive(false);
+        accessGrant.setExpired(true);
+        accessGrant.setExpiresAt(Instant.now());
 
-        grant.setActive(false);
-        grant.setExpired(true);
-        grant.setExpiresAt(Instant.now());
-        grant.setRevokeTime(Instant.now());
-
-        return accessGrantRepository.save(grant);
+        return accessGrantRepository.save(accessGrant);
     }
 
     public List<AccessGrant> getActiveConsents(String patientId) {

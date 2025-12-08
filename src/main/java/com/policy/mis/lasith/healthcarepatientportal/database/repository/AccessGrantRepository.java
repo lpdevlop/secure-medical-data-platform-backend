@@ -1,6 +1,7 @@
 package com.policy.mis.lasith.healthcarepatientportal.database.repository;
 
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessRequest;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface AccessGrantRepository extends JpaRepository<AccessGrant,Long> {
@@ -20,5 +22,8 @@ public interface AccessGrantRepository extends JpaRepository<AccessGrant,Long> {
 
     Optional<AccessGrant> findByPatientAndDoctorAndActive(String doctor, String patientId);
 
-    List<AccessGrant> findByActive(String patientId);
+    List<AccessGrant> findAccessGrantByPatientAndActive(String patientId);
+
+    Optional<AccessGrant> findById(UUID fromString);
+
 }
