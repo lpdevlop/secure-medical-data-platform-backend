@@ -2,13 +2,13 @@ package com.policy.mis.lasith.healthcarepatientportal.database.entity;
 
 
 import jakarta.persistence.*;
-import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.UUID;
 
 
 @Entity
@@ -18,33 +18,46 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class AuditLog {
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private UUID actorId;
+    private String entityName;
 
-    private String actorRole;
 
+    private String entityId;
+
+
+    @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
     private String action;
 
-    private String targetType;
+    @Column(columnDefinition = "TEXT")
+    private String oldValue;
 
-    private UUID targetId;
+    @Column(columnDefinition = "TEXT")
+    private String newValue;
 
-    @Column(length = 2000)
-    private String details;
+    private String previousHash;
 
-    private Instant timestamp;
+    private String currentHash;
 
-    private String ipAddress;
+
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
-    @UpdateTimestamp
-    private Instant updatedAt;
+    @CreatedBy
+    @Column(updatable = false)
+    private String createdBy;
+
+    @LastModifiedBy
+    private String updatedBy;
+
 
 }
