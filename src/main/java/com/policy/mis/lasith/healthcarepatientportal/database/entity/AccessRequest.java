@@ -27,7 +27,7 @@ public class AccessRequest {
     @ManyToOne(optional = false)
     private User requesterDoctor;
 
-    @Column(name = "secure_id", nullable = false, unique = true)
+    @Column(name = "secure_id", unique = true)
     private String accessRequestsecureId;
 
     @ManyToOne(optional = false)
@@ -46,7 +46,8 @@ public class AccessRequest {
     private Instant updatedAt;
 
 
-    public enum RequestStatus { PENDING, APPROVED,EXPIRED, DENIED, CANCELLED }
+    public enum RequestStatus { PENDING, APPROVED,EXPIRED, DENIED, CANCELLED,GRANTED,REVOKED
+    }
 
 
     private Instant grantStartAt;
@@ -57,6 +58,9 @@ public class AccessRequest {
     private boolean active ;
 
     private boolean isExpired;
+
+    @Column(name = "is_revoked")
+    private boolean revoked;
 
 
 }

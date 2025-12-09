@@ -18,5 +18,6 @@ public class MedicalHistoryWithGrantInfo {
     String medicalId;
     String type;
     Instant accessExpires;
+    Instant date;
 
 }

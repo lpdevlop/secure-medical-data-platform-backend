@@ -7,17 +7,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 public interface AccessRequestRepository extends JpaRepository<AccessRequest,Long> {
 
 
-    Optional<AccessRequest> findByRequesterDoctorAndPatient(User doctor, User patient);
+    Optional<AccessRequest> findByRequesterDoctorAndPatientAndRevokedFalse(User doctor, User patient);
 
     List<AccessRequest> findAccessRequestByPatient(User patient);
 
     List<AccessRequest> findAccessGrantByRequesterDoctorAndActiveTrue(User doctor);
 
-    Optional<AccessRequest> findAccessRequestByAccessRequestsecureId(String secureId);
+    Optional<AccessRequest> findAccessRequestByRequesterDoctorAndAccessRequestsecureId(User requesterDoctorId, String accessRequestsecureId);
 }

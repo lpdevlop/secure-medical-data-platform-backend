@@ -35,6 +35,7 @@ public class MedicalService {
         MedicalData data = MedicalData.builder()
                 .patient(patient)
                 .name(dto.getName())
+                .medicalSecureId(dto.getMedicalSecureId())
                 .docType(dto.getDocType())
                 .type(dto.getType())
                 .prescriptionNote(dto.getPrescriptionNote())
@@ -59,7 +60,9 @@ public class MedicalService {
                                 medical.getName(),
                                 medical.getMedicalSecureId(),
                                 "Granted",
-                                grant.getGrantExpiresAt()
+                                grant.getGrantExpiresAt(),
+                                medical.getCreatedAt()
+
                         ))
                 )
                 .toList();
@@ -80,7 +83,8 @@ public class MedicalService {
                                 medical.getName(),
                                 medical.getMedicalSecureId(),
                                 "Granted",
-                                grant.getGrantExpiresAt()
+                                grant.getGrantExpiresAt(),
+                                medical.getCreatedAt()
                         ))
                 )
                 .toList();
@@ -96,8 +100,10 @@ public class MedicalService {
                         medical.getName(),
                         medical.getMedicalSecureId(),
                         "Granted",
-                        null
-        )).toList();
+                        null,
+                        medical.getCreatedAt()
+
+                )).toList();
     }
 
 
@@ -112,7 +118,8 @@ public class MedicalService {
                                 medical.getName(),
                                 medical.getMedicalSecureId(),
                                 "Granted",
-                                null
+                                null,
+                                medical.getCreatedAt()
                         )).toList();
     }
 }

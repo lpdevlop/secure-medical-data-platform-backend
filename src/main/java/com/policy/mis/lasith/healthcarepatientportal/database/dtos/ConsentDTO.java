@@ -18,4 +18,5 @@ public class ConsentDTO {
     private Instant startAt;
     private Instant expiresAt;
     private Instant requestedAt;
+    boolean isRevoked ;
 }

@@ -18,4 +18,6 @@ public class MedicalRecordsWithGrantInfo {
     String medicalId;
     String type;
     Instant accessExpires;
+    Instant date;
+
 }

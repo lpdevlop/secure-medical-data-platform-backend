@@ -9,4 +9,5 @@ public class AccessRequestDTO {
 
     private String patientSecureId;
     private String doctorId;
+
 }

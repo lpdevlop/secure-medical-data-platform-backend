@@ -33,7 +33,8 @@ public class AppConfig {
         return new UserDetailsService() {
             @Override
             public UserDetails loadUserByUsername(String secureId) throws UsernameNotFoundException {
-                return userRepository.findBySecureId(secureId).get();
+                return userRepository.findBySecureId(secureId)
+                        .orElseThrow(() -> new UsernameNotFoundException("User not found with secureId: " + secureId));
             }
         };
     }

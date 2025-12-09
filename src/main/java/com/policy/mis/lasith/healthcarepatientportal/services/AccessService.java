@@ -14,7 +14,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AccessService {
@@ -42,7 +41,7 @@ public class AccessService {
         User patient = userRepository.findBySecureId(accessRequest.getPatientSecureId())
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
-        if(accessRequestRepository.findByRequesterDoctorAndPatient(doctor,patient).isPresent()){
+        if(accessRequestRepository.findByRequesterDoctorAndPatientAndRevokedFalse(doctor,patient).isPresent()){
             throw new RuntimeException("Doctor not found");
         }
 
@@ -50,6 +49,9 @@ public class AccessService {
         AccessRequest request = AccessRequest.builder()
                 .requesterDoctor(doctor)
                 .patient(patient)
+                .accessRequestsecureId(generateRandomARCode())
+                .active(false)
+                .isExpired(false)
                 .status(AccessRequest.RequestStatus.PENDING)
                 .build();
 
@@ -72,8 +74,11 @@ public class AccessService {
         if (!patient.getRole().equals(UserRoles.PATIENT.name())) {
             throw new RuntimeException("User is not authorized as PATIENT");
         }
+        User doctor = userRepository.findById(dto.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        Optional<AccessRequest> request = accessRequestRepository.findAccessRequestByAccessRequestsecureId(dto.getDoctorId());
+
+        Optional<AccessRequest> request = accessRequestRepository.findAccessRequestByRequesterDoctorAndAccessRequestsecureId(doctor,dto.getItemId());
 
 
         if (!request.get().getPatient().getId().equals(patient.getId())) {
@@ -85,13 +90,11 @@ public class AccessService {
         }
 
 
-        AccessRequest accessGrant=new AccessRequest();
-
-        accessGrant.setActive(true);
-        accessGrant.setGrantExpiresAt(LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.UTC));
-        accessGrant.setGrantStartAt(Instant.now());
-        accessGrant.setExpired(true);
-        accessGrant.setStatus(AccessRequest.RequestStatus.APPROVED);
+        request.get().setActive(true);
+        request.get().setGrantExpiresAt(LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.UTC));
+        request.get().setGrantStartAt(Instant.now());
+        request.get().setExpired(true);
+        request.get().setStatus(AccessRequest.RequestStatus.GRANTED);
 
         accessRequestRepository.save(request.get());
 
@@ -100,7 +103,7 @@ public class AccessService {
                 .doctorName(request.get().getRequesterDoctor().getFullName())
                 .patientName(request.get().getPatient().getFullName())
                 .status(request.get().getStatus().name())
-                .expiresAt(accessGrant.getGrantExpiresAt())
+                .expiresAt(request.get().getGrantExpiresAt())
                 .build();
 
     }
@@ -115,17 +118,20 @@ public class AccessService {
         if (!patient.getRole().equals(UserRoles.PATIENT.name())) {
             throw new RuntimeException("User is not authorized as PATIENT");
         }
+        User doctor = userRepository.findById(payload.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        Optional<AccessRequest> request = accessRequestRepository.findAccessRequestByAccessRequestsecureId(payload.getDoctorId());
+        Optional<AccessRequest> request = accessRequestRepository.findAccessRequestByRequesterDoctorAndAccessRequestsecureId(doctor,payload.getItemId());
 
         if (!request.get().getPatient().getId().equals(patient.getId())) {
             throw new RuntimeException("You cannot approve someone else's access request.");
         }
-        AccessRequest accessRequest=new AccessRequest();
-        accessRequest.setActive(false);
-        accessRequest.setExpired(true);
-        accessRequest.setGrantExpiresAt(Instant.now());
-        return accessRequestRepository.save(accessRequest);
+        request.get().setActive(false);
+        request.get().setExpired(true);
+        request.get().setRevoked(true);
+        request.get().setStatus(AccessRequest.RequestStatus.REVOKED);
+        request.get().setGrantExpiresAt(Instant.now());
+        return accessRequestRepository.save(request.get());
     }
 
     public List<ConsentDTO> getActiveConsents(String patientId) {
@@ -144,11 +150,15 @@ public class AccessService {
                     request.getStatus().name(),
                     null,
                     null,
-                    request.getCreatedAt()
+                    request.getCreatedAt(),
+                    request.isRevoked()
             ));
         }
 
         return consentList;
     }
-
+    public static String generateRandomARCode() {
+        int num = (int)(Math.random() * 99999) + 1;
+        return String.format("AR%05d", num);
+    }
 }

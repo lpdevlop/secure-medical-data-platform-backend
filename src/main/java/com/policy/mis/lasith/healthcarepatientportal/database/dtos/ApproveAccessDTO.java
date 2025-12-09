@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class ApproveAccessDTO {
 
-    private String doctorId;
+    private Long doctorId;
     private String patientId;
-
+    private String itemId;
 }
