@@ -28,7 +28,7 @@ public class AuditLogController {
         return ResponseEntity.ok(log);
     }
 
-    @GetMapping("/getall}")
+    @GetMapping("/getall")
     @PreAuthorize("hasAnyRole('AUDITOR')")
     public ResponseEntity< List<EncryptedBackupsLogs> > getAll() throws Exception {
         List<EncryptedBackupsLogs> log = auditLogService.getAllLogs();
