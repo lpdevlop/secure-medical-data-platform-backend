@@ -45,8 +45,7 @@ public class AccessRequest {
     private Instant updatedAt;
 
 
-    public enum RequestStatus { PENDING, APPROVED,EXPIRED, DENIED, CANCELLED,GRANTED,REVOKED
-    }
+    public enum RequestStatus { PENDING, APPROVED,EXPIRED, DENIED, CANCELLED,GRANTED,REVOKED}
 
 
     private Instant grantStartAt;
