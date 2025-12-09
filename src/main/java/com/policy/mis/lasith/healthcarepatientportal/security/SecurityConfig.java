@@ -46,6 +46,7 @@ public class SecurityConfig {
                         req
                                 .requestMatchers("/api/auth/login/**").permitAll()
                                 .requestMatchers("/api/auth/signup/**").permitAll()
+                                .requestMatchers("/api/medical/add").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

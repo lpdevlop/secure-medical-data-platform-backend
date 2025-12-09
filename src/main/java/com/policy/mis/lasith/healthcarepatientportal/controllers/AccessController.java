@@ -1,7 +1,7 @@
 package com.policy.mis.lasith.healthcarepatientportal.controllers;
 
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.*;
-import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessRequest;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
 import com.policy.mis.lasith.healthcarepatientportal.services.AccessService;
 import org.springframework.http.HttpStatus;
@@ -43,12 +43,13 @@ public class AccessController {
 
     @PostMapping("/revoke")
     @PreAuthorize("hasRole('PATIENT')")
-    public ResponseEntity<AccessGrant> revokeConsent(@RequestBody ApproveAccessDTO dto) {
+    public ResponseEntity<AccessRequest> revokeConsent(@RequestBody ApproveAccessDTO dto) {
         return ResponseEntity.ok(accessService.revokeConsent(dto));
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<AccessGrant>> getActiveConsents(@AuthenticationPrincipal User currentPatient) {
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<List<ConsentDTO>> getActiveConsents(@AuthenticationPrincipal User currentPatient) {
         return ResponseEntity.ok(accessService.getActiveConsents(currentPatient.getSecureId()));
     }
 

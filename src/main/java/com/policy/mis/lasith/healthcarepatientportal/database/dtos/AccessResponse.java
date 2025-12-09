@@ -9,7 +9,7 @@ import java.util.UUID;
 @Builder
 public class AccessResponse implements Serializable {
 
-    private UUID requestId;
+    private String requestId;
     private String doctorName;
     private String patientName;
     private String status;

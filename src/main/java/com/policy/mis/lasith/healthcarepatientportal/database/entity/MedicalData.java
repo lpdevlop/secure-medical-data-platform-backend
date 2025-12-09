@@ -8,7 +8,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "medical_data")
@@ -21,8 +20,11 @@ import java.util.UUID;
 public class MedicalData {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "secure_id", nullable = false, unique = true)
+    private String medicalSecureId;
 
     @ManyToOne(optional = false)
     private User patient;

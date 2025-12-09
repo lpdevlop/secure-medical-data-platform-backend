@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class GrantAccessResponse {
-    private UUID requestId;
+    private String requestId;
     private String doctorName;
     private String patientName;
     private String status;

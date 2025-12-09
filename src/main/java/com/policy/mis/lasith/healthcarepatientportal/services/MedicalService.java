@@ -1,11 +1,11 @@
 package com.policy.mis.lasith.healthcarepatientportal.services;
-import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalDocumentResponse;
+import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalDataRequestDTO;
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalHistoryWithGrantInfo;
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalRecordsWithGrantInfo;
-import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessRequest;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.MedicalData;
 import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
 import com.policy.mis.lasith.healthcarepatientportal.database.enums.MedicalDataType;
-import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessGrantRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessRequestRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.MedicalDataRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.UserRepository;
@@ -21,53 +21,66 @@ public class MedicalService {
 
     private final AccessRequestRepository accessRequestRepository;
 
-    private final AccessGrantRepository accessGrantRepository;
 
-    public MedicalService(MedicalDataRepository medicalDataRepository, UserRepository userRepository, AccessRequestRepository accessRequestRepository, AccessGrantRepository accessGrantRepository) {
+    public MedicalService(MedicalDataRepository medicalDataRepository, UserRepository userRepository, AccessRequestRepository accessRequestRepository) {
         this.medicalDataRepository = medicalDataRepository;
         this.userRepository = userRepository;
         this.accessRequestRepository = accessRequestRepository;
-        this.accessGrantRepository = accessGrantRepository;
     }
 
+    public MedicalData addMedicalData(MedicalDataRequestDTO dto) {
+        User patient = userRepository.findBySecureId(dto.getPatientId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        MedicalData data = MedicalData.builder()
+                .patient(patient)
+                .name(dto.getName())
+                .docType(dto.getDocType())
+                .type(dto.getType())
+                .prescriptionNote(dto.getPrescriptionNote())
+                .pdfData(dto.getPdfData())
+                .build();
+
+        return medicalDataRepository.save(data);
+    }
 
     public List<MedicalHistoryWithGrantInfo> getMedicalHistory(String doctorId) {
         User doctor =userRepository.findBySecureId(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
-        List<AccessGrant> accessGrants =accessGrantRepository.findAccessGrantByDoctorAndActiveTrue(doctor);
+        List<AccessRequest> accessGrants =accessRequestRepository.findAccessGrantByRequesterDoctorAndActiveTrue(doctor);
 
         return accessGrants.stream()
                 .flatMap(grant -> medicalDataRepository
-                        .findByPatientAndType(grant.getPatient(), MedicalDataType.HISTORY.name())
+                        .findByPatientAndType(grant.getPatient(), MedicalDataType.HISTORY)
                         .stream()
                         .map(medical -> new MedicalHistoryWithGrantInfo(
                                 medical.getPatient().getSecureId(),
                                 medical.getName(),
-                                medical.getId(),
+                                medical.getMedicalSecureId(),
                                 "Granted",
-                                grant.getExpiresAt()
+                                grant.getGrantExpiresAt()
                         ))
                 )
                 .toList();
     }
 
-    public List<MedicalRecordsWithGrantInfo> getPrescriptionHistory(String doctorId) {
+    public List<MedicalRecordsWithGrantInfo> getRecordList(String doctorId) {
      User user= userRepository.findBySecureId(doctorId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        List<AccessGrant> accessGrants =accessGrantRepository.findAccessGrantByDoctorAndActiveTrue(user);
+        List<AccessRequest> accessGrants =accessRequestRepository.findAccessGrantByRequesterDoctorAndActiveTrue(user);
 
         return accessGrants.stream()
                 .flatMap(grant -> medicalDataRepository
-                        .findByPatientAndType(grant.getPatient(), MedicalDataType.RECORD.name())
+                        .findByPatientAndType(grant.getPatient(), MedicalDataType.RECORD)
                         .stream()
                         .map(medical -> new MedicalRecordsWithGrantInfo(
                                 medical.getPatient().getSecureId(),
                                 medical.getName(),
-                                medical.getId(),
+                                medical.getMedicalSecureId(),
                                 "Granted",
-                                grant.getExpiresAt()
+                                grant.getGrantExpiresAt()
                         ))
                 )
                 .toList();
@@ -77,11 +90,11 @@ public class MedicalService {
         User user=userRepository.findBySecureId(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        return medicalDataRepository.findByPatientAndType(user, "HISTORY").stream().map(
+        return medicalDataRepository.findByPatientAndType(user, MedicalDataType.RECORD).stream().map(
                 medical -> new MedicalRecordsWithGrantInfo(
                         medical.getPatient().getSecureId(),
                         medical.getName(),
-                        medical.getId(),
+                        medical.getMedicalSecureId(),
                         "Granted",
                         null
         )).toList();
@@ -92,12 +105,12 @@ public class MedicalService {
         User user=userRepository.findBySecureId(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
         return  medicalDataRepository
-                        .findByPatientAndType(user, "HISTORY")
+                        .findByPatientAndType(user, MedicalDataType.HISTORY)
                         .stream()
                         .map(medical -> new MedicalHistoryWithGrantInfo(
                                 medical.getPatient().getSecureId(),
                                 medical.getName(),
-                                medical.getId(),
+                                medical.getMedicalSecureId(),
                                 "Granted",
                                 null
                         )).toList();

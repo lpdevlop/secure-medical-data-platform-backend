@@ -15,7 +15,7 @@ import java.util.UUID;
 public class MedicalHistoryWithGrantInfo {
     String patientId;
     private String name;
-    UUID medicalId;
+    String medicalId;
     String type;
     Instant accessExpires;
 

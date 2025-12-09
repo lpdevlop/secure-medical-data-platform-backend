@@ -1,8 +1,9 @@
 package com.policy.mis.lasith.healthcarepatientportal.services;
 
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.PatientProfileWithGrantInfoDTO;
-import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessGrant;
-import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessGrantRepository;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.AccessRequest;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.User;
+import com.policy.mis.lasith.healthcarepatientportal.database.repository.AccessRequestRepository;
 import com.policy.mis.lasith.healthcarepatientportal.database.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,15 +15,14 @@ import java.util.List;
 public class ProfileService {
 
     private final UserRepository patientRepository;
-    private final AccessGrantRepository grantRepository;
+    private final AccessRequestRepository accessRequestRepository;
 
     public List<PatientProfileWithGrantInfoDTO> getPatientProfile(String doctorId) {
 
-        List<AccessGrant> grants = grantRepository
-                .findByDoctor_SecureIdAndActiveTrueAndIsExpiredFalseAndExpiresAtAfter(
-                        doctorId,
-                        Instant.now()
-                );
+        User doctor =patientRepository.findBySecureId(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        List<AccessRequest> grants = accessRequestRepository.findAccessGrantByRequesterDoctorAndActiveTrue(doctor);
 
         return grants.stream()
                 .map(grant -> { grant.getPatient();
@@ -33,7 +33,7 @@ public class ProfileService {
                             .phone(grant.getPatient().getPhoneNumber())
                             .address(grant.getPatient().getAddress())
                             .accessGranted(true)
-                            .accessExpiresAt(grant.getExpiresAt().toString())
+                            .accessExpiresAt(grant.getGrantExpiresAt().toString())
                             .build();
                 })
                 .toList();

@@ -1,15 +1,15 @@
 package com.policy.mis.lasith.healthcarepatientportal.controllers;
 
+import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalDataRequestDTO;
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalHistoryWithGrantInfo;
 import com.policy.mis.lasith.healthcarepatientportal.database.dtos.MedicalRecordsWithGrantInfo;
+import com.policy.mis.lasith.healthcarepatientportal.database.entity.MedicalData;
 import com.policy.mis.lasith.healthcarepatientportal.services.MedicalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -18,6 +18,12 @@ import java.util.List;
 public class MedicalDataController {
 
     private final MedicalService medicalDataService;
+
+    @PostMapping("/add")
+    public ResponseEntity<MedicalData> addMedicalData(@RequestBody MedicalDataRequestDTO dto) {
+        MedicalData savedData = medicalDataService.addMedicalData(dto);
+        return ResponseEntity.ok(savedData);
+    }
 
     @GetMapping("/history/{doctorId}")
     @PreAuthorize("hasRole('DOCTOR')")
@@ -30,7 +36,7 @@ public class MedicalDataController {
     public ResponseEntity<List<MedicalRecordsWithGrantInfo>> getPrescriptionHistory(
             @PathVariable String doctorId
     ) {
-        return ResponseEntity.ok(medicalDataService.getPrescriptionHistory(doctorId));
+        return ResponseEntity.ok(medicalDataService.getRecordList(doctorId));
     }
 
 

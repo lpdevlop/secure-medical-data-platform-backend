@@ -20,13 +20,15 @@ import java.util.UUID;
 public class AccessRequest {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 
     @ManyToOne(optional = false)
     private User requesterDoctor;
 
+    @Column(name = "secure_id", nullable = false, unique = true)
+    private String accessRequestsecureId;
 
     @ManyToOne(optional = false)
     private User patient;
@@ -45,4 +47,16 @@ public class AccessRequest {
 
 
     public enum RequestStatus { PENDING, APPROVED,EXPIRED, DENIED, CANCELLED }
+
+
+    private Instant grantStartAt;
+
+    private Instant grantExpiresAt;
+
+
+    private boolean active ;
+
+    private boolean isExpired;
+
+
 }
